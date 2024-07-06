@@ -6,7 +6,6 @@ import { isValidate } from "../utils/mongodbValidate.js";
 import { Blog } from '../model/blogModel.js';
 import slugify from 'slugify';
 
-
 export const createBlog = asyncHandler(async (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
@@ -40,38 +39,74 @@ export const createBlog = asyncHandler(async (req, res, next) => {
 })
 
 export const getBlog = asyncHandler(async (req, res, next) => {
-    try {
-        const data=await Blog.find();
-        if(!data){
-            return next(new ApiError([],"","No Blog exist in database",402));
-        }
-        await data.save();
-        const response=new ApiResponse(data,201,"Blog Found");
-        res.status(201).json(response);
-    } catch (error) {
-        next(new ApiError([],error.stack,"An error Occurred",501));
+    const { category, sort, limit, page, tag, author } = req.query;
+    let query = {}
+    if (category) {
+        query.category = category;
     }
+    if (author) {
+        query.author = author;
+    }
+    if (tag) {
+        query.tag = { $in: tag.split(',') }
+    }
+    const options = {
+        paginate: parseInt(page, 10) || 10,
+        sort: { createdAt: -1 },
+        limit: parseInt(limit, 10) || 10
+    }
+    if (sort) {
+        options.sort = { [sort]: 1 };
+    }
+    try {
+        const result = await Blog.paginate(query, options);
 
-
+        const response = new ApiResponse({
+            blogs: result.docs,
+            total: result.totalDocs,
+            totalPages: result.totalPages,
+            currentPage: result.page,
+        }, 200, "Blogs fetched successfully");
+        res.status(response.statusCode).json(response)
+    } catch (error) {
+        next(new ApiError([], error.stack, "An Error Occurred", 501))
+    }
 })
 
-export const getABlog=asyncHandler(async(req,res,next)=>{
-    const id=req.params.id.trim();
+export const getABlog = asyncHandler(async (req, res, next) => {
+    const id = req.params.id.trim();
     isValidate(id);
     try {
-        const find=await Blog.findById(id);
-        if(!find){
-            return next(new ApiError([],"","Blog not found",402))
+        const find = await Blog.findById(id);
+        if (!find) {
+            return next(new ApiError([], "", "Blog not found", 402))
         }
-        find.views+=1;
+        find.views += 1;
         await find.save();
-        const response=new ApiResponse(find,201,"Blog founded");
+        const response = new ApiResponse(find, 201, "Blog founded");
         res.status(201).json(response);
     } catch (error) {
-        next(new ApiError([],error.stack,"An error Occurred",501))
+        next(new ApiError([], error.stack, "An error Occurred", 501))
     }
 })
 
-export const updateABlog=asyncHandler(async(req,res,next)=>{
-
+export const updateABlog = asyncHandler(async (req, res, next) => {
+    const blogId=req.params;
+    isValidate(blogId);
+    try {
+        const {title,content,tags}=req.body;
+        const data=await Blog.findByIdAndUpdate(blogId,{
+            title,
+            content,
+            tags,
+            images:req.files(file=>file.path)
+        },{new:true})
+        if(!data){
+            return next(new ApiError([],"","Blog was not found",401))
+        }
+        const response=new ApiResponse(data,201,"Update Blog Successfully")
+        res.status(response.statusCode).json(response);
+    } catch (error) {
+        next(new ApiError([],error.stack,"An Error Occurred",501))
+    }
 })
