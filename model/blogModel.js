@@ -44,6 +44,14 @@ const blogSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   }],
+  likesCount:{
+    type:Number,
+    default:0
+  },
+  disLikesCount:{
+    type:Number,
+    default:0
+  }
 }, { timestamps: true });
 blogSchema.plugin(mongoosePaginate);
 export const Blog = mongoose.model('Blog', blogSchema);

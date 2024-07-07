@@ -30,9 +30,7 @@ const sendEmail = async (email, message, subject) => {
             subject: subject,
             html: message
         })
-        console.log('Welcome email sent successfully');
-        console.log('Message sent: %s', info.messageId);
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+        
     } catch (error) {
         throw new error("Error sending welcome email", error.message);
     }

@@ -8,7 +8,7 @@ const storage=new CloudinaryStorage({
     params:{
         folder:'products',
         allowedFormats:['jpeg','png','jpg'],
-        // public_id:(req,file)=>file.orignalname
+        //  public_id:(req,file)=>file.orignalname
     }
 })
 export const upload=multer({storage:storage});

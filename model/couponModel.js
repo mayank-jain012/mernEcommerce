@@ -19,6 +19,10 @@ const couponSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  expiry:{
+    type:Date,
+    required:true
+  }
 }, { timestamps: true });
 
 export const Coupon = mongoose.model('Coupon', couponSchema);
