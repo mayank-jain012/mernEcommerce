@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-const productModel=mongoose.Schema({
+const productModel = mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -19,7 +19,7 @@ const productModel=mongoose.Schema({
     },
     brand: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:'Brand',
+        ref: 'Brand',
         required: true,
     },
     description: {
@@ -42,6 +42,17 @@ const productModel=mongoose.Schema({
         type: Number,
         default: 0,
     },
+    ratingDistribution: {
+        type: Map,
+        of: Number,
+        default: {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0
+        }
+    },
 }, { timestamps: true });
 productModel.plugin(mongoosePaginate);
-export const Product=mongoose.model('Product',productModel);
+export const Product = mongoose.model('Product', productModel);

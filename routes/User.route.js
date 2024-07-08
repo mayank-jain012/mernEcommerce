@@ -25,7 +25,7 @@ const Userroute=express.Router();
 Userroute.post('/register',registerValidation,registeredUser);
 Userroute.post('/login',loginValidation,loginUser);
 Userroute.get('/refreshToken',handleRefreshToken);
-Userroute.get('/get',authMiddleware,isAdmin,getAllUser);
+Userroute.get('/get',getAllUser);
 Userroute.post('/adminlogin',adminLogin);
 Userroute.get('/get/:id',authMiddleware,getAUser);
 Userroute.post('/resetPassword',resetPassword1,resetPassword);

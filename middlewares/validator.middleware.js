@@ -122,3 +122,11 @@ export const validateUpdateVariant = [
     body('images.*').optional().isString().withMessage('Each image should be a string'),
   ];
 // variant end here
+
+// rating start here
+export const validateCreateRating = [
+    body('user').isMongoId().withMessage('Invalid product ID'),
+    body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating should be between 1 and 5'),
+    body('comment').optional().isString().withMessage('Comment must be a string'),
+  ];
+// rating end here
