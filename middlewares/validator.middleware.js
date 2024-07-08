@@ -92,72 +92,33 @@ export const couponValidation=[
         .isNumeric().withMessage("Discount always in number")
 ]
 // coupon model end here
-
 // product validation start here
 export const validateProduct = [
     body('name').trim().notEmpty().withMessage('Product name is required'),
     body('category').trim().notEmpty().withMessage('Category is required'),
     body('brand').trim().notEmpty().withMessage('Brand is required'),
     body('description').trim().notEmpty().withMessage('Description is required'),
-    body('variants').trim().notEmpty().withMessage("Variant is required"),
-    // body('variants').custom((value, { req }) => {
-    //     if (typeof value === 'string') {
-    //         try {
-    //             req.body.variants = JSON.parse(value);
-    //         } catch (error) {
-    //             throw new Error('Invalid JSON in variants field');
-    //         }
-    //     }
-    //     return true;
-    // }),
-    // checkSchema({
-    //     // 'variants': {
-    //     //     isArray: {
-    //     //         errorMessage: 'Variants should be an array',
-    //     //         options: { min: 1 },
-    //     //     },
-    //     //     custom: {
-    //     //         options: (value) => {
-    //     //             for (const variant of value) {
-    //     //                 if (!variant.size || !variant.color || !variant.price || !variant.stock || !variant.images) {
-    //     //                     throw new Error('All fields in variants are required');
-    //     //                 }
-    //     //                 if (!Array.isArray(variant.images)) {
-    //     //                     throw new Error('Images should be an array');
-    //     //                 }
-    //     //             }
-    //     //             return true;
-    //     //         },
-    //     //     },
-    //     // },
-    //     'variants.*.size': {
-    //         isMongoId: true,
-    //         errorMessage: 'Invalid size ID',
-    //     },
-    //     'variants.*.color': {
-    //         isMongoId: true,
-    //         errorMessage: 'Invalid color ID',
-    //     },
-    //     'variants.*.price': {
-    //         isFloat: {
-    //             options: { min: 0 },
-    //             errorMessage: 'Price should be a number greater than or equal to 0',
-    //         },
-    //     },
-    //     'variants.*.stock': {
-    //         isInt: {
-    //             options: { min: 0 },
-    //             errorMessage: 'Stock should be an integer greater than or equal to 0',
-    //         },
-    //     },
-    //     'variants.*.images': {
-    //         isArray: true,
-    //         errorMessage: 'Images should be an array',
-    //     },
-    //     'variants.*.images.*': {
-    //         isString: true,
-    //         errorMessage: 'Each image should be a string',
-    //     },
-    // }),
 ];
-;
+export const validateUpdateProduct = [
+    body('category').optional().isMongoId().withMessage('Invalid category ID'),
+    body('brand').optional().isMongoId().withMessage('Invalid brand ID'),
+    body('description').optional().trim().notEmpty().withMessage('Description is required'),
+  ];
+// product validation end here
+// variant start here
+export const validateVariant = [
+  body('productId').isMongoId().withMessage('Invalid product ID'),
+  body('size').isMongoId().withMessage('Invalid size ID'),
+  body('color').isMongoId().withMessage('Invalid color ID'),
+  body('price').isFloat({ min: 0 }).withMessage('Price should be a number greater than or equal to 0'),
+  body('stock').isInt({ min: 0 }).withMessage('Stock should be an integer greater than or equal to 0'),
+];
+export const validateUpdateVariant = [
+    body('size').optional().isMongoId().withMessage('Invalid size ID'),
+    body('color').optional().isMongoId().withMessage('Invalid color ID'),
+    body('price').optional().isFloat({ min: 0 }).withMessage('Price should be a number greater than or equal to 0'),
+    body('stock').optional().isInt({ min: 0 }).withMessage('Stock should be an integer greater than or equal to 0'),
+    body('images').optional().isArray().withMessage('Images should be an array'),
+    body('images.*').optional().isString().withMessage('Each image should be a string'),
+  ];
+// variant end here

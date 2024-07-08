@@ -4,34 +4,18 @@ import slugify from 'slugify'
 import { validationResult, body } from "express-validator";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
-import { upload } from "../middlewares/multer.middleware.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { isValidate } from "../utils/mongodbValidate.js";
 
 export const createProduct = asyncHandler(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(new ApiError(errors.array(), "", "Validation Error", 400));
   }
-
   try {
-    const { name, category, brand, description, variants } = req.body;
+    const { name, category, brand, description } = req.body;
     console.log(name);
     const slug = slugify(name, { lower: true });
-    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
-    // Handling variants
-    const savedVariants = await Promise.all(
-      parsedVariants.map(async (variant) => {
-        let newVariant = new Variant({
-          size: variant.size,
-          color: variant.color,
-          price: variant.price,
-          stock: variant.stock,
-          images: variant.images
-        });
-        return await newVariant.save();
-      })
-    );
-
     // Creating product
     let product = new Product({
       name,
@@ -39,7 +23,6 @@ export const createProduct = asyncHandler(async (req, res, next) => {
       category,
       brand,
       description,
-      variants: savedVariants.map(variant => variant._id),
       images: req.files.map(file => file.path)
     });
     // Saving product
@@ -52,26 +35,45 @@ export const createProduct = asyncHandler(async (req, res, next) => {
   }
 })
 
-
-
-
 export const getProduct = asyncHandler(async (req, res, next) => {
   try {
-    const product = await Product.find();
-    if (!product) {
-      return next([], "", "No Product Exist", 402);
+    const {brand,size,color,category,limit=10,page=1,sort="createdAt"}=req.query;
+    let filter={};
+    if(brand){
+      filter.brand=brand;
     }
-    const response = new ApiResponse(product, 201, "Get All Product")
-    res.status(201).json(response);
+    if(category){
+      filter.category=category
+    }
+    if(color|| size){
+      let variantFilter={}
+      if(color){
+        variantFilter.color=color
+      }
+      if(size){
+        variantFilter.size=size
+      }
+      const variants=await Variant.find(variantFilter).select("_id");
+      const variantId=variants.map(varaint=>varaint?._id);
+      filter.variants={$in:variantId}
+    }
+    const option={
+      page:parseInt(page,10),
+      limit:parseInt(limit,10),
+      sort:{[sort]:1}
+    }
+    const products = await Product.paginate(filter,option)
+    const response = new ApiResponse(products, 200, "Products fetched successfully");
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(new ApiError([], error.stack, "An Error Occurred", 501))
+    next(new ApiError([], error.stack, "An error occurred", 500));
   }
 })
 export const getAProduct = asyncHandler(async (req, res, next) => {
   const id = req.params.id.trim();
   isValidate(id);
   try {
-    const product = await Product.findById(id);
+    const product = await Product.findById(id)
     if (!product) {
       return next(new ApiError([], "", "Product not exist", 402))
     }
@@ -97,5 +99,27 @@ export const deleteProduct = asyncHandler(async (req, res, next) => {
 })
 
 export const updateProduct = asyncHandler(async (req, res, next) => {
-
+  const id=req.params.id.trim();
+  isValidate(id);
+  // const errors = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   return next(new ApiError(errors.array(), "", "Validation Error", 400));
+  // }
+  try {
+    const { category, brand, description } = req.body;
+    const product=await Product.findByIdAndUpdate(id,{
+      category,
+      brand,
+      description,
+    },{new:true});
+    if(!product){
+      return next(new ApiError([], "", "Product not exist", 402))
+    }
+    await product.save();
+    const response = new ApiResponse(product, 201, "Product updated successfully");
+    res.status(response.statusCode).json(response);
+  } catch (error) {
+    console.log(error);
+    next(new ApiError([], error.stack, "An error occurred", 500));
+  }
 })

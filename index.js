@@ -16,6 +16,7 @@ import CategoryRoute from './routes/Category.route.js'
 import BlogCategoryRoute from './routes/BlogCategory.route.js'
 import BlogRoute from './routes/Blog.route.js';
 import CouponRoute from './routes/Coupon.route.js';
+import VariantRoute from './routes/Variant.route.js';
 app.use(cors({
     origin:process.env.CROSS_ORIGIN,
     credentials:true
@@ -33,6 +34,7 @@ app.use('/api/category',CategoryRoute);
 app.use('/api/blogcategory',BlogCategoryRoute);
 app.use('/api/blog',BlogRoute);
 app.use('/api/coupon',CouponRoute);
+app.use('/api/variant',VariantRoute);
 app.use(errorHandler);
 
 connection()
