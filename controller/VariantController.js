@@ -15,6 +15,7 @@ export const createVariant=asyncHandler(async(req,res,next)=>{
         const images = req.files.map(file => file.path);
     
         let newVariant = await Variant.create({
+          product:productId,
           size,
           color,
           price,

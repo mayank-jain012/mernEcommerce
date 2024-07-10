@@ -1,15 +1,20 @@
 import mongoose from "mongoose";
 const variantModel = mongoose.Schema({
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
+    },
     size: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Size",
-        
+        ref: "Size",
+
         required: true
     },
     color: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Color",
-        
+        ref: "Color",
+
         required: true
     },
     price: {
@@ -24,7 +29,7 @@ const variantModel = mongoose.Schema({
         type: String,
         required: true
     }]
-},{
-    timestamps:true
+}, {
+    timestamps: true
 })
-export const Variant=mongoose.model("Variant",variantModel);
+export const Variant = mongoose.model("Variant", variantModel);

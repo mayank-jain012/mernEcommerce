@@ -1,4 +1,4 @@
-import { body,checkSchema } from "express-validator";
+import { body,checkSchema ,param} from "express-validator";
 import { User } from "../model/userSchema.js";
 import { upload } from './multer.middleware.js'
 // auth validation start
@@ -130,3 +130,26 @@ export const validateCreateRating = [
     body('comment').optional().isString().withMessage('Comment must be a string'),
   ];
 // rating end here
+//wishlist start here
+export const validationWishlist=[
+    body('items').isArray().withMessage("Items Should be an array").custom((items)=>{
+        if(!items || items.length==0){
+            throw new Error("Atleat One Item required")
+        }
+        for(const item of items){
+            if(!item.productId){
+                throw new Error("ProductId is required for each item")
+            }
+        }
+        return true;
+    })
+]
+export const validateRemoveFromWishlist = [
+    body('productId').notEmpty().withMessage('Product ID is required'),
+    body('variantId').optional().isMongoId().withMessage('Invalid Variant ID')
+];
+  
+// export const validateGetWishlist = [
+//     param('userId').isMongoId().withMessage('Invalid User ID')
+// ];
+// wishlist end here
