@@ -129,6 +129,12 @@ export const validateCreateRating = [
     body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating should be between 1 and 5'),
     body('comment').optional().isString().withMessage('Comment must be a string'),
   ];
+
+export const validateUpdateRating=[
+    param('id').isMongoId().withMessage(""),
+    body('rating').isInt({min:1,max:5}).withMessage("Rating Should be between 1 and 5"),
+    body('comment').optional().isString().withMessage("Comment always a string")
+]
 // rating end here
 //wishlist start here
 export const validationWishlist=[
@@ -148,8 +154,5 @@ export const validateRemoveFromWishlist = [
     body('productId').notEmpty().withMessage('Product ID is required'),
     body('variantId').optional().isMongoId().withMessage('Invalid Variant ID')
 ];
-  
-// export const validateGetWishlist = [
-//     param('userId').isMongoId().withMessage('Invalid User ID')
-// ];
 // wishlist end here
+

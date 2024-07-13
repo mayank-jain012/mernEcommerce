@@ -6,6 +6,7 @@ import { Product } from '../model/productSchema.js'
 import { validationResult } from 'express-validator'
 import { Wishlist } from '../model/wishlistModel.js'
 import { User } from '../model/userSchema.js'
+
 export const addWishlist = asyncHandler(async (req, res, next) => {
     const userId = req?.user?._id;
     const { items } = req?.body;
