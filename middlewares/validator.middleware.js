@@ -125,15 +125,18 @@ export const validateUpdateVariant = [
 
 // rating start here
 export const validateCreateRating = [
-    body('user').isMongoId().withMessage('Invalid product ID'),
+    // body('user').isMongoId().withMessage('Invalid product ID'),
     body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating should be between 1 and 5'),
     body('comment').optional().isString().withMessage('Comment must be a string'),
   ];
 
 export const validateUpdateRating=[
-    param('id').isMongoId().withMessage(""),
+    param('id').isMongoId().withMessage("Invalid Id"),
     body('rating').isInt({min:1,max:5}).withMessage("Rating Should be between 1 and 5"),
-    body('comment').optional().isString().withMessage("Comment always a string")
+    body('coment').optional().isString().withMessage("Comment always a string")
+]
+export const validateDeleteRating=[
+    param('id').isMongoId().withMessage("Invalid Id")
 ]
 // rating end here
 //wishlist start here

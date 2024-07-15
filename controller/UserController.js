@@ -90,13 +90,13 @@ export const loginUser = asyncHandler(async (req, res, next) => {
     const { email, password } = req?.body;
     try {
         const findUser = await User.findOne({ email })
-        console.log(findUser)
+        
         if (!findUser || !(await findUser.isPasswordMatched(password))) {
             return next(new ApiError([], "", "Invalid Email Or Password", 400))
         }
-        console.log(findUser?._id);
+        
         const refreshToken = generateRefreshtoken(findUser?.id);
-        console.log(refreshToken)
+        
         await User.findByIdAndUpdate(findUser?.id, { refreshToken: refreshToken }, { new: true })
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
