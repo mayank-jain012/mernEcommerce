@@ -159,3 +159,19 @@ export const validateRemoveFromWishlist = [
 ];
 // wishlist end here
 
+// cart start here
+
+export const validationCreateCart=[
+    body('variantId').isMongoId().withMessage('Invalid id'),
+    body('productId').isMongoId().withMessage('Invalid id'),
+    body('quantity').notEmpty().withMessage("Quantity is required").isNumeric().withMessage("Quantity must be a number")
+]
+
+export const validationRemoveCart=[
+    body('variantId').isMongoId().withMessage('Invalid id'),
+    body('productId').isMongoId().withMessage('Invalid id')
+]
+
+export const validationApplyCouponCart=[
+    body('couponCode').notEmpty().withMessage("Coupon Code is Mandatory").isString().withMessage("Coupon Code Must Be a String")
+]

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const connection=async()=>{
     try {
-        const url=process.env.mongodb;
+        const url=process.env.MONGODB;
         if(!url){
             throw new Error("Mongodb Url not correct");
         }

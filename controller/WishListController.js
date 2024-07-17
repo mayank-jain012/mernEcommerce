@@ -17,11 +17,9 @@ export const addWishlist = asyncHandler(async (req, res, next) => {
     try {
         let wishlist = await Wishlist.findOne({ user: userId })
         console.log(wishlist);
-
         if (!wishlist) {
             wishlist = await Wishlist.create({ user: userId, items: [] })
             await User.findByIdAndUpdate(userId, { $push: { wishlist: wishlist?._id } }, { new: true });
-
         }
         for (const item of items) {
             const { productId, variantId } = item;
@@ -93,6 +91,9 @@ export const removeWishlist = asyncHandler(async (req, res, next) => {
         const wishlist = await Wishlist.findOne({ user: userId });
         if (!wishlist) {
             return next(new ApiError([], "", "Wishlist not found", 401));
+        }
+        if(wishlist){
+            await User.findByIdAndUpdate(userId, { $pull: { wishlist: wishlist?._id } }, { new: true });
         }
         const itemIndex = wishlist.items.findIndex((item) => item.product.toString() === productId && (!variantId || item.variant.toString() == variantId))
         if (itemIndex === -1) {
