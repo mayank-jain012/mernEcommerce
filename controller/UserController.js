@@ -1,10 +1,10 @@
 import JsonWebToken from 'jsonwebtoken';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { ApiError } from '../utils/apiError.js';
+ import { ApiError } from '../utils/apiError.js';
 import { User } from '../model/userSchema.js';
 import bcrypt from "bcrypt";
-import nodemailer from 'nodemailer'
-import { ApiResponse } from '../utils/apiResponse.js'
+import nodemailer from 'nodemailer';
+ import { ApiResponse } from '../utils/apiResponse.js';
 import { validationResult } from 'express-validator';
 import { generateRefreshtoken } from '../configure/refreshToken.js';
 import { token } from '../configure/jwtToken.js'
@@ -295,6 +295,7 @@ export const saveAddress = asyncHandler(async (req, res, next) => {
         { new: true })
         await user.save();
         const address=new ApiResponse("",201,"Add adress successfully")
+        res.status(address.statusCode).json(address);
     } catch (error) {
         next(new ApiError([],error.stack,"An error occurred",501));
     }

@@ -20,6 +20,7 @@ import VariantRoute from './routes/Variant.route.js';
 import RatingRoute from './routes/rating.route.js';
 import WishListRoute from './routes/Wishlist.route.js';
 import CartRoute from './routes/Cart.route.js';
+import OrderRoute from './routes/Order.route.js';
 app.use(cors({
     origin:process.env.CROSS_ORIGIN,
     credentials:true
@@ -41,6 +42,7 @@ app.use('/api/variant',VariantRoute);
 app.use('/api/rating',RatingRoute);
 app.use('/api/wishlist',WishListRoute);
 app.use('/api/cart',CartRoute);
+app.use('/api/order',OrderRoute);
 app.use(errorHandler);
 connection()
     .then(() => {
