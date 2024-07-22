@@ -1,35 +1,3 @@
-// import fs from 'fs';
-// import PDFDocument from 'pdfkit';
-// import { User } from '../model/userSchema.js';
-// export const generateInvoice = async (order) => {
-//   const user = await User.findById(order.user).lean().exec();
-//   if (!user) {
-//     throw new Error('User not found');
-//   }
-//   const doc = new PDFDocument();
-
-//   const invoicePath = `./invoices/${order._id}.pdf`;
-//   doc.pipe(fs.createWriteStream(invoicePath));
-
-//   doc.text(`Order Invoice - ${order._id}`);
-//   doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-//   doc.text(`Customer: ${order.user.firstname}`);
-//   doc.text(`Email: ${order.user.email}`);
-
-//   doc.text('Items:');
-//   order.orderItems.forEach(item => {
-//     doc.text(`- ${item.name} (${item.size.name}, ${item.color.name}): ${item.quantity} x ${item.price}`);
-//   });
-
-//   doc.text(`Items Price: ${order.itemsPrice}`);
-//   doc.text(`Tax Price: ${order.taxPrice}`);
-//   doc.text(`Shipping Price: ${order.shippingPrice}`);
-//   doc.text(`Total Price: ${order.totalPrice}`);
-
-//   doc.end();
-
-//   return invoicePath;
-// };
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import { User } from '../model/userSchema.js';

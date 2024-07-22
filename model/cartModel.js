@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+// calculate weight of the cart according the quantity and the number of product
 const cartItemSchema = mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,

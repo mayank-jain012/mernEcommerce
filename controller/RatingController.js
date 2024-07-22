@@ -5,6 +5,7 @@ import { validationResult } from 'express-validator'
 import { isValidate } from "../utils/mongodbValidate.js";
 import { Rating } from '../model/ratingSchema.js';
 import { Product } from '../model/productSchema.js';
+
 export const createRating = asyncHandler(async (req, res,next) => {
     const product = req.params.id.trim();
     isValidate(product)

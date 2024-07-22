@@ -5,6 +5,7 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { User } from '../model/userSchema.js';
 import { validationResult } from 'express-validator'
 import { isValidate } from '../utils/mongodbValidate.js';
+
 export const createCoupon = asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty) {
