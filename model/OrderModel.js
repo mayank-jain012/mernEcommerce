@@ -42,7 +42,6 @@ const orderSchema = mongoose.Schema({
         },
         shippingCode: { 
             type: String, 
-            // required: true 
         },
         postalCode: { 
             type: String, 

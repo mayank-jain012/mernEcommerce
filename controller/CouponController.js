@@ -100,3 +100,9 @@ export const deleteCoupon = asyncHandler(async (req, res, next) => {
         next(new ApiError([], error.stack, "An error Occurred", 501))
     }
 })
+// get top coupon 
+export const topCoupon=asyncHandler(async(req,res,next)=>{
+})
+// get coupon usuage
+export const couponUsuage=asyncHandler(async(req,res,next)=>{
+})

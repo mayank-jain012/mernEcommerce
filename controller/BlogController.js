@@ -210,4 +210,10 @@ export const getAllBlogsLikesDislikes = asyncHandler(async (req, res, next) => {
     } catch (error) {
       next(new ApiError([], error.stack, "An error occurred while fetching blogs' likes and dislikes", 500));
     }
-  });
+ });
+ // get blog performance
+ export const getBlogPerformance=asyncHandler(async(req,res,next)=>{
+ })
+// get most viewed blog
+export const getMostViewBlog=asyncHandler(async(req,res,next)=>{
+})

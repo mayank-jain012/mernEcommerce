@@ -1,10 +1,10 @@
 import JsonWebToken from 'jsonwebtoken';
 import { asyncHandler } from '../utils/asyncHandler.js';
- import { ApiError } from '../utils/apiError.js';
+import { ApiError } from '../utils/apiError.js';
 import { User } from '../model/userSchema.js';
 import bcrypt from "bcrypt";
 import nodemailer from 'nodemailer';
- import { ApiResponse } from '../utils/apiResponse.js';
+import { ApiResponse } from '../utils/apiResponse.js';
 import { validationResult } from 'express-validator';
 import { generateRefreshtoken } from '../configure/refreshToken.js';
 import { token } from '../configure/jwtToken.js'
@@ -12,29 +12,8 @@ import jwt from 'jsonwebtoken';
 import { isValidate } from '../utils/mongodbValidate.js';
 import { registrationEmailTemplate, loginEmailTemplate, forgotPasswordContent } from '../utils/emailContent.js';
 import { verifyOtp, otpGeneratorAndUpdate } from '../utils/otpGenerator.js'
-// sendEmail
-const sendEmail = async (email, message, subject) => {
-    try {
-        let transporter = nodemailer.createTransport({
-            service: "gmail",
-            port: 465,
-            secure: true,
-            auth: {
-                user: "mayankjain12feb@gmail.com",
-                pass: "dyqb tszc somg bwsv"
-            }
-        });
-        const info = await transporter.sendMail({
-            from: '"DIGITAL DELIGHTS"<digital.delight@gmail.com>',
-            to: email,
-            subject: subject,
-            html: message
-        })
-        
-    } catch (error) {
-        throw new error("Error sending welcome email", error.message);
-    }
-}
+import { sendEmail } from '../utils/sendEmail.js';
+import { getEmailTemplate } from '../utils/sendEmail.js';
 export const registeredUser = asyncHandler(async (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
@@ -56,8 +35,10 @@ export const registeredUser = asyncHandler(async (req, res, next) => {
             role: role
         })
         await user.save();
-        const rgisterMail = registrationEmailTemplate(firstname + lastname);
-        sendEmail(email, rgisterMail, "Welcome to DIGITAL DELIGHTS - Start Shopping Today!")
+       
+        const emailData = getEmailTemplate('signup', { user });
+        await sendEmail(email, (await emailData).subject, (await emailData).text, (await emailData).html);
+       
         res.status(201).json(new ApiResponse(user, 201, "User Registered Successfully"))
     } catch (error) {
         console.log(error)
@@ -90,13 +71,13 @@ export const loginUser = asyncHandler(async (req, res, next) => {
     const { email, password } = req?.body;
     try {
         const findUser = await User.findOne({ email })
-        
+
         if (!findUser || !(await findUser.isPasswordMatched(password))) {
             return next(new ApiError([], "", "Invalid Email Or Password", 400))
         }
-        
+
         const refreshToken = generateRefreshtoken(findUser?.id);
-        
+
         await User.findByIdAndUpdate(findUser?.id, { refreshToken: refreshToken }, { new: true })
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
@@ -112,8 +93,8 @@ export const loginUser = asyncHandler(async (req, res, next) => {
             token: gettoken
         }, 201, "Login Successfully")
         res.status(response.statusCode).json(response)
-        const rgisterMail = loginEmailTemplate(findUser?.firstname + findUser?.lastname);
-        sendEmail(email, rgisterMail, "Welcome to DIGITAL DELIGHTS - Start Shopping Today!")
+        const emailData = getEmailTemplate('login', { findUser });
+        await sendEmail(email,(await emailData).subject, (await emailData).text, (await emailData).html);
     } catch (error) {
         console.log(error)
         next(new ApiError([], error.stack, "An Error Occurred", 500))
@@ -218,10 +199,9 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
         if (!exist) {
             return next(new ApiError([], "", "The user does not exist", 402))
         }
-        const otp = await otpGeneratorAndUpdate(email);
-        console.log(otp)
-        const mail = forgotPasswordContent(exist.firstname + exist.lastname, otp)
-        await sendEmail(exist.email, mail, "Forgot Password");
+
+        const emailData = getEmailTemplate('forgotPassword', { exist });
+        await sendEmail(email, (await emailData).subject, (await emailData).text, (await emailData).html);
         const response = new ApiResponse({}, 200, "Otp sent Successfully")
         res.status(response.statusCode).json(response);
 
@@ -231,31 +211,31 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
 })
 export const logOut = asyncHandler(async (req, res, next) => {
     //get cookies
-    const {cookies}=req.cookies;
+    const { cookies } = req.cookies;
     // check exist
-    if(!cookies.refreshToken){
-        return next([],"","No refresh token attached",402)
+    if (!cookies.refreshToken) {
+        return next([], "", "No refresh token attached", 402)
     }
-    const refreshToken=cookies.refreshToken;
+    const refreshToken = cookies.refreshToken;
     try {
-        const user=await User.findOne({refreshToken});
-        if(!user){
-            res.clearCookie(refreshToken,{
-                httpOnly:true,
-                secure:true
+        const user = await User.findOne({ refreshToken });
+        if (!user) {
+            res.clearCookie(refreshToken, {
+                httpOnly: true,
+                secure: true
             })
-            return res.status(204).json(new ApiResponse({},204,"NO user found with this token"))
+            return res.status(204).json(new ApiResponse({}, 204, "NO user found with this token"))
         }
-        await User.findOneAndUpdate(refreshToken,{refreshToken:""},{new:true})
-        res.clearCookie(refreshToken,{
-            httpOnly:true,
-            secure:true
+        await User.findOneAndUpdate(refreshToken, { refreshToken: "" }, { new: true })
+        res.clearCookie(refreshToken, {
+            httpOnly: true,
+            secure: true
         })
     } catch (error) {
-        next(new ApiError([],"","An error Occurred",501))
+        next(new ApiError([], "", "An error Occurred", 501))
     }
-    
-    
+
+
     // find 
     // update
     // clear
@@ -288,16 +268,31 @@ export const saveAddress = asyncHandler(async (req, res, next) => {
     const { _id } = req.user;
     isValidate(_id);
     try {
-        const user = await User.findByIdAndUpdate(_id, 
+        const user = await User.findByIdAndUpdate(_id,
             {
-            address: req?.body?.address
-            }, 
-        { new: true })
+                address: req?.body?.address
+            },
+            { new: true })
         await user.save();
-        const address=new ApiResponse("",201,"Add adress successfully")
+        const address = new ApiResponse("", 201, "Add adress successfully")
         res.status(address.statusCode).json(address);
     } catch (error) {
-        next(new ApiError([],error.stack,"An error occurred",501));
+        next(new ApiError([], error.stack, "An error occurred", 501));
     }
 })
+// get user purchase history
+export const purchaseHistory = asyncHandler(async (req, res, next) => {
 
+})
+// get user engagement rate
+export const engagementRate = asyncHandler(async (req, res, next) => {
+
+})
+//get top spending user
+export const topSpendingUser = asyncHandler(async (req, res, next) => {
+
+})
+// get customer retention rate
+export const customerRetentionRate = asyncHandler(async (req, res, next) => {
+
+})

@@ -10,20 +10,19 @@ import { ApiResponse } from "../utils/apiResponse.js";
 // get sales for product
 // get sales for trends
 // get top selling product
+// get top selling category
 // get sales by category
 // get sales by brand
+
 // get sales by color
+
 // get sales by region
 
 // get sales by forecast
 // get popular variant
 
-// get user purchase history
-// get user engagement rate
-//get top spending user
 
-// get blog performance
 
-// get top coupon 
 
-// get coupon usuage
+
+

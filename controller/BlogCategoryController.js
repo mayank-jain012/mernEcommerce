@@ -5,7 +5,7 @@ import {validationResult} from 'express-validator'
 import {isValidate} from "../utils/mongodbValidate.js";
 import {BlogCategory} from '../model/blogCategoryModel.js';
 import slugify from 'slugify';
-export const createBlogCategory=asyncHandler(async(req,res,next)=>{
+  export const createBlogCategory=asyncHandler(async(req,res,next)=>{
     const error=validationResult(req);
     if(!error.isEmpty()){
         return next(new ApiError(error.array,"","Validation error",501));
@@ -72,3 +72,4 @@ export const createBlogCategory=asyncHandler(async(req,res,next)=>{
       next(new ApiError([],error.stack,"An error occurred",501))
     }
   })
+  

@@ -9,7 +9,9 @@ import { sendEmail } from "../utils/sendEmail.js";
 import {Sales} from '../model/salesSchema.js';
 import { verifyPayment } from "../utils/verifyPayment.js";
 import { Inventory } from "../model/inventoryModel.js";
-
+import { isValidate } from "../utils/mongodbValidate.js";
+import { getEmailTemplate } from "../utils/sendEmail.js";
+import fs from 'fs'
 export const createOrder = asyncHandler(async (req, res, next) => {
     const userId = req?.user?._id;
     const {  paymentMethod,shippingAddress } = req.body;
@@ -67,14 +69,21 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         cart.items = [];
         await cart.save();
         const invoice = await generateInvoice(order)
-        await sendEmail(req.user.email, invoice, order)
+        const emailData = getEmailTemplate('order', { name: req.user.firstname, orderId: order._id });
+        await sendEmail(req.user.email, emailData.subject, emailData.text, emailData.html, [{ filename: `${order._id}.pdf`, path: invoice }]);
+        fs.unlink(invoice,(err)=>{
+            if(err){
+                console.error(`Error deleting invoice file ${invoice}:`, err);
+            }else{
+                console.log(`Invoice file ${invoice} deleted successfully`);   
+            }
+        })
         if(paymentMethod==="Online"){
             const razorpayOrder = await razorpay.orders.create({
                 amount: totalPrice * 100, // Amount in paise
                 currency: 'INR',
                 receipt: order._id.toString(),
             });
-
             // Respond with Razorpay order details
             res.json({
                 success: true,
@@ -93,20 +102,37 @@ export const createOrder = asyncHandler(async (req, res, next) => {
     }
 })
 
-export const placeOrder = asyncHandler(async (req, res, next) => {
-
-})
-
 export const updateStatus = asyncHandler(async (req, res, next) => {
 
 })
 
 export const getOrderById = asyncHandler(async (req, res, next) => {
-
+    const id=req.params.id.trim();
+    isValidate(id);
+    try {
+        const order=await Order.findById(id);
+        if(!order){
+            return next(new ApiError([],"","Order Not Exist",501));
+        }
+        const response=new ApiResponse(order,201,"Order founded");
+        res.statusCode(201).json(response);
+    } catch (error) {
+        next(new ApiError([],error.stack,"An Error Occurred",501));
+    }
 })
 
 export const getUserOrder = asyncHandler(async (req, res, next) => {
-
+    const userId=req.user;
+    try {
+        const user=await Order.findOne({user:userId}).populate('items.product items.variant')
+        if(!user){
+            return next(new ApiError([],"","Order Not found",501));
+        }
+        const response=new ApiResponse(user,201,"Order founded");
+        res.statusCode(201).json(response);
+    } catch (error) {
+        next(new ApiError([],error,stack,error.message,501));
+    }
 })
 
 export const cancelOrder = asyncHandler(async (req, res, next) => {
@@ -118,18 +144,29 @@ export const updateShipping = asyncHandler(async (req, res, next) => {
 })
 
 export const trackOrder = asyncHandler(async (req, res, next) => {
-
+    const userId=req.user._id;
+    const paramsId=req.params.id;
+    isValidate(paramsId);
+    try {
+        const order = await Order.findOne({user:userId,_id:paramsId}).populate('orderItems.product user')
+        if(!order){
+            return next(new ApiError([], '', 'Order not found', 404));
+        }
+        const emailData = getEmailTemplate('trackOrder', { name: req.user.firstname, order });
+        await sendEmail(req.user.email, emailData.subject, emailData.text, emailData.html);
+        const response = new ApiResponse(order, 200, 'Order tracking email sent successfully.');
+        res.status(response.statusCode).json(response);
+    } catch (error) {
+     next(new ApiError([],"",error.message,501))   
+    }
 })
 
 export const payment = asyncHandler(async(req,res,next)=>{
     const { paymentId, orderId, signature } = req.body;
     const secret = process.env.KEY_SECRET; 
-
     if (verifyPayment(orderId, paymentId, signature, secret)) {
-        
         try {
             const order = await Order.findById(orderId);
-
             if (order) {
                 order.paymentResult = {
                     id: paymentId,
@@ -153,6 +190,15 @@ export const payment = asyncHandler(async(req,res,next)=>{
         return next(new ApiError([],"","Invalid Signature",402))
     }
 })
-
 // calcultate average order value
-// calculte customer retention rate
+export const averageOrderValue=asyncHandler(async(req,res,next)=>{
+
+})
+// get order status breakdown
+export const statusBreakDown=asyncHandler(async(req,res,next)=>{
+
+})
+// get order fullfillment rates
+export const fullfillmentRates=asyncHandler(async(req,res,next)=>{
+
+})

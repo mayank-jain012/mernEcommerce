@@ -175,3 +175,11 @@ export const validationRemoveCart=[
 export const validationApplyCouponCart=[
     body('couponCode').notEmpty().withMessage("Coupon Code is Mandatory").isString().withMessage("Coupon Code Must Be a String")
 ]
+
+export const validationCreateOrder=[
+    body('paymentMethod').notEmpty().withMessage("Payment Method is Required"),
+    body('shippingAddress').notEmpty().withMessage("Shipping Address is Required"),
+    body('shippingAddress.postalCode').notEmpty().withMessage("Shipping Address is Required"),
+    body('shipping.address').notEmpty().withMessage("Shipping Address is Required"),
+    body('shippingAddress.state').notEmpty().withMessage("Shipping Address is Required"),
+]

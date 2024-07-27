@@ -19,7 +19,7 @@ export const loginEmailTemplate = (username) => `
     </div>
 `;
 
-export const forgotPasswordContent = (firstname,otp)=>`
+export const forgotPasswordContent = (firstname, otp) => `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #333;">Password Reset Request</h2>
         <p>Hi ${firstname},</p>
@@ -29,3 +29,17 @@ export const forgotPasswordContent = (firstname,otp)=>`
         <p>The Team</p>
       </div>
     `;
+
+export const OrderPlacedContent = (firstname) => `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <h2 style="color: #333;">Password Reset Request</h2>
+      <p>Hi ${firstname},</p>
+      <p>Thank you for your order! We’ll let you know as soon as it ships.While you’re waiting,</p>
+      <p>check out this post on how to use it.Or spread the word! Click here to share your order </p>
+      <p>on social media.</p>
+      <p>Best Regards</p>
+      <p>The Team</p>
+    </div>
+  `;
+   
+  
