@@ -41,5 +41,75 @@ export const OrderPlacedContent = (firstname) => `
       <p>The Team</p>
     </div>
   `;
+
+function getOrderStatusMessage(order_status) {
+  switch (order_status) {
+    case 'processing':
+      return '<li><strong>Processing:</strong> Your order has been received and is being prepared.</li>';
+    case 'Dispatching':
+      return '<li><strong>Dispatching:</strong> Your order is on its way to our courier partner.</li>';
+    case 'Delivered':
+      return '<li><strong>Delivered:</strong> Your order has been delivered to the provided address.</li>';
+    case 'Cancelled':
+      return '<li><strong>Cancelled:</strong> Your order has been cancelled. Please contact us if you have any questions or need further assistance.</li>';
+    default:
+      return '<li><strong>Unknown:</strong> The status of your order is unknown. Please contact customer support for more information.</li>';
+  }
+}
+
+export const TrackOrderContent = (username, status, order_number, order_date, items) => {
+  let message = getOrderStatusMessage(status)
+
+  const formattedDate = new Date(order_date).toLocaleDateString();
+  const itemsTable = `
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="border: 1px solid #ddd; padding: 8px;">Product Name</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Quantity</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(item => `
+          <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">${item.name}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">${item.quantity}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">${item.price}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+    return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2 style="color: #333;">Order Status Update</h2>
+    <p>Hi ${username},</p>
+    <p>Thank you for shopping with us at DIGITAL DELIGHTS! We wanted to provide you with an update on your order <strong>#${order_number}</strong>.</p>
+    <p><strong>Order Details:</strong></p>
+    <p>Order Number: ${order_number}</p>
+    <p>Order Date: ${formattedDate}</p>
    
-  
+    <p>Items Ordered: ${itemsTable}</p>
+   
+    <p class="status"><strong>Current Status:</strong> ${status} - ${message}</p>
+    <p><strong>Status Definitions:</strong></p>
+   <ul>
+        ${message}
+    </ul>
+    <p><strong>Tracking Information:</strong></p>
+    <p>If you have any questions or need further assistance, please do not hesitate to contact our customer service team at <strong>mayankjain12feb@gmail.com</strong> or call us at <strong>+918826250203</strong>.</p>
+    <p>Thank you for choosing DIGITAL DELIGHT. We appreciate your business and look forward to serving you again!</p>
+    <p>Best Regards,</p>
+    <p>MAYANK JAIN</p>
+    <p>DIGITAL DELIGHTS</p>
+    <p>www.digitaldelights.com</p>
+    <p>mayankjain12feb@gmail.com</p>
+    <p>+918826250203</p>
+</div>
+
+
+`
+}
+
+

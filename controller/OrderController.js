@@ -70,6 +70,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         await cart.save();
         const invoice = await generateInvoice(order)
         const emailData = getEmailTemplate('order', { name: req.user.firstname, orderId: order._id });
+        console.log(emailData)
         await sendEmail(req.user.email, emailData.subject, emailData.text, emailData.html, [{ filename: `${order._id}.pdf`, path: invoice }]);
         fs.unlink(invoice,(err)=>{
             if(err){
@@ -148,12 +149,13 @@ export const trackOrder = asyncHandler(async (req, res, next) => {
     const paramsId=req.params.id;
     isValidate(paramsId);
     try {
-        const order = await Order.findOne({user:userId,_id:paramsId}).populate('orderItems.product user')
+        const order = await Order.findOne({user:userId,_id:paramsId}).populate('orderItems.name user')
         if(!order){
             return next(new ApiError([], '', 'Order not found', 404));
         }
         const emailData = getEmailTemplate('trackOrder', { name: req.user.firstname, order });
-        await sendEmail(req.user.email, emailData.subject, emailData.text, emailData.html);
+        console.log("Email Data",emailData)
+        await sendEmail(req.user.email, (await emailData).subject, (await emailData).text, (await emailData).html);
         const response = new ApiResponse(order, 200, 'Order tracking email sent successfully.');
         res.status(response.statusCode).json(response);
     } catch (error) {

@@ -1,13 +1,12 @@
 import nodemailer from 'nodemailer';
 import { otpGeneratorAndUpdate } from './otpGenerator.js';
-import { forgotPasswordContent, loginEmailTemplate, OrderPlacedContent, registrationEmailTemplate } from './emailContent.js';
+import { forgotPasswordContent, loginEmailTemplate, OrderPlacedContent, registrationEmailTemplate,TrackOrderContent } from './emailContent.js';
 export const sendEmail = async (to, subject, text, html, attachments) => {
-  console.log(to)
+  // console.log(to)
   console.log(subject)
   console.log(text)
   console.log(html)
-  console.log(attachments)
-  console.log(typeof(attachments))
+ 
   try {
     let transporter = nodemailer.createTransport({
       service: "gmail",
@@ -66,13 +65,13 @@ export const getEmailTemplate = async (type, data) => {
       return {
         subject: `Order Confirmation - ${data.orderId}`,
         text: `Hello ${data.name}, your order ${data.orderId} has been placed successfully.`,
-        html: OrderPlacedContent(data.user.firstname),
+        html: OrderPlacedContent(data.name),
       };
     case 'trackOrder':
       return {
-        subject: `Order Tracking - ${data.orderId}`,
-        text: `Hello ${data.name}, you can track your order ${data.orderId} here: ${data.trackingLink}.`,
-        html: `<p>Hello <strong>${data.name}</strong>, you can track your order <strong>${data.orderId}</strong> <a href="">here</a>.</p>`,
+        subject: ` Update on Your Order ${data.order._id} - Current Status: ${data.order.status}`,
+        text: `Hello ${data.order.user.firstname}, you can track your order ${data.order._id}.`,
+        html: TrackOrderContent(data.order.user.firstname,data.order.status,data.order._id,data.order.createdAt,data.order.orderItems),
       };
     case 'coupon':
       return {
