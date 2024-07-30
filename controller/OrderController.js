@@ -11,10 +11,16 @@ import { verifyPayment } from "../utils/verifyPayment.js";
 import { Inventory } from "../model/inventoryModel.js";
 import { isValidate } from "../utils/mongodbValidate.js";
 import { getEmailTemplate } from "../utils/sendEmail.js";
+import {validationResult} from 'express-validator'
 import fs from 'fs'
 export const createOrder = asyncHandler(async (req, res, next) => {
     const userId = req?.user?._id;
+   
     const {  paymentMethod,shippingAddress } = req.body;
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+        return next(new ApiError(error.array, "", "Validation error", 501));
+    }
     try {
         const cart = await Cart.findOne({ user: userId }).populate("items.product items.variant")
         if (!cart || cart.items.length === 0) {
@@ -104,7 +110,26 @@ export const createOrder = asyncHandler(async (req, res, next) => {
 })
 
 export const updateStatus = asyncHandler(async (req, res, next) => {
-
+    const id=req.params.id.trim();
+    isValidate(id);
+    const {status}=req.body;
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+        return next(new ApiError(error.array, "", "Validation error", 501));
+    }
+    try {
+        const order=await Order.findByIdAndUpdate(id,{status},{new:true}).populate('user orderItems.name');
+        if(!order){
+           return next(new ApiError([],{},"Order Not Found",401));
+        }
+        const emailData = getEmailTemplate('trackOrder', { name: order.user.firstname, order });
+      
+        await sendEmail(order.user.email, (await emailData).subject, (await emailData).text, (await emailData).html);
+        const response = new ApiResponse(order, 200, 'Order Status Update Successfully');
+        res.status(response.statusCode).json(response);
+    } catch (error) {
+        next(new ApiError([],error.stack,"An Error Occurred",501))   
+    }
 })
 
 export const getOrderById = asyncHandler(async (req, res, next) => {
@@ -137,11 +162,57 @@ export const getUserOrder = asyncHandler(async (req, res, next) => {
 })
 
 export const cancelOrder = asyncHandler(async (req, res, next) => {
-
+    const {reason}=req.body;
+    const id=req.params.id.trim();
+    isValidate(id);
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+        return next(new ApiError(error.array, "", "Validation error", 501));
+    }
+    try {
+        const order=await Order.findById(id).populate('user orderItems.name');
+        if(!order){
+           return next(new ApiError([],{},"Order Not Found",401));
+        }
+        if(order.status==='cancelled'){
+            return next(new ApiError([],{},"Order is Already Cancelled",401));
+        }
+        if(order.status!=='processing'){
+            return next(new ApiError([],{},'Order is Cancelled when its status is processing',401));
+        }
+        order.status='cancelled';
+        await Order.findByIdAndDelete(id);
+        await order.save();
+        const emailData = getEmailTemplate('trackOrder', { name: order.user.firstname, order });
+        await sendEmail(order.user.email, (await emailData).subject, (await emailData).text, (await emailData).html);
+        const response = new ApiResponse(order, 200, 'Order Was Cancelled successfully.');
+        res.status(response.statusCode).json(response);
+    } catch (error) {
+        next(new ApiError([],error.stack,"An Error Occurred",501))
+    }
 })
 
 export const updateShipping = asyncHandler(async (req, res, next) => {
-
+    const userId=req?.user?._id;
+    const {shippingAddress}=req.body;
+    const id=req.params.id.trim();
+    isValidate(id);
+    const error=validationResult(req);
+    try {
+        const order=await Order.findOne({user:userId,_id:id});
+        if(!order){
+            return next(new ApiError([],{},"Order Not Found",401));
+        }
+        if(order.status!=='processing'){
+            return next(new ApiError([],{},'Address was not changed because order was shipped',401));
+        }
+        order.shippingAddress=shippingAddress;
+        await order.save();
+        const response = new ApiResponse(order, 200, 'User Address Update Successfully');
+        res.status(response.statusCode).json(response);
+    } catch (error) {
+        next(new ApiError([],{},"An Error Occurred",501));
+    }
 })
 
 export const trackOrder = asyncHandler(async (req, res, next) => {
@@ -153,16 +224,12 @@ export const trackOrder = asyncHandler(async (req, res, next) => {
         if(!order){
             return next(new ApiError([], '', 'Order not found', 404));
         }
-        const emailData = getEmailTemplate('trackOrder', { name: req.user.firstname, order });
-        console.log("Email Data",emailData)
-        await sendEmail(req.user.email, (await emailData).subject, (await emailData).text, (await emailData).html);
         const response = new ApiResponse(order, 200, 'Order tracking email sent successfully.');
         res.status(response.statusCode).json(response);
     } catch (error) {
      next(new ApiError([],"",error.message,501))   
     }
 })
-
 export const payment = asyncHandler(async(req,res,next)=>{
     const { paymentId, orderId, signature } = req.body;
     const secret = process.env.KEY_SECRET; 
@@ -194,7 +261,21 @@ export const payment = asyncHandler(async(req,res,next)=>{
 })
 // calcultate average order value
 export const averageOrderValue=asyncHandler(async(req,res,next)=>{
-
+    try {
+        const order=await Order.aggregate([{
+            $group:{
+                _id:null,
+                averageOrderValue:{$avg:'$totalPrice'}
+            }
+        }])
+        if(order.length==0){
+            return next(new ApiError([],{},"Order Not Exist",501));
+        }
+        const response=new ApiResponse({averageOrderValue:order[0].averageOrderValue});
+        res.status(200).json(response);
+    } catch (error) {
+        next(new ApiError([],{},"An Error Occurred",501));
+    }
 })
 // get order status breakdown
 export const statusBreakDown=asyncHandler(async(req,res,next)=>{
@@ -202,5 +283,16 @@ export const statusBreakDown=asyncHandler(async(req,res,next)=>{
 })
 // get order fullfillment rates
 export const fullfillmentRates=asyncHandler(async(req,res,next)=>{
+    try {
+        const totalOrder=await Order.countDocuments();
+        const avgDoc=await Order.countDocuments({status:'delievered'});
+        if(totalOrder===0){
 
+        }
+        const fullFillRate=(totalOrder/avgDoc)*100;
+        const response = new ApiResponse(fullFillRate, 200, 'Get Order FullFillMent Rate');
+        res.status(response.statusCode).json(response);
+    } catch (error) {
+        next(new ApiError([],{},"An Error Occurred",501));
+    }
 })

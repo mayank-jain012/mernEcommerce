@@ -183,3 +183,10 @@ export const validationCreateOrder=[
     body('shipping.address').notEmpty().withMessage("Shipping Address is Required"),
     body('shippingAddress.state').notEmpty().withMessage("Shipping Address is Required"),
 ]
+export const updateStatusOrder=[
+    body('status').notEmpty().isIn(['processing','shipped','delivered','cancelled']).withMessage("Status Must Be Required or Invalid Status")
+]
+
+export const cancelOrderStatus=[
+    body('reason').notEmpty().withMessage("Reason is required")
+]

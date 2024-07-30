@@ -46,11 +46,11 @@ function getOrderStatusMessage(order_status) {
   switch (order_status) {
     case 'processing':
       return '<li><strong>Processing:</strong> Your order has been received and is being prepared.</li>';
-    case 'Dispatching':
+    case 'shipped':
       return '<li><strong>Dispatching:</strong> Your order is on its way to our courier partner.</li>';
-    case 'Delivered':
+    case 'delivered':
       return '<li><strong>Delivered:</strong> Your order has been delivered to the provided address.</li>';
-    case 'Cancelled':
+    case 'cancelled':
       return '<li><strong>Cancelled:</strong> Your order has been cancelled. Please contact us if you have any questions or need further assistance.</li>';
     default:
       return '<li><strong>Unknown:</strong> The status of your order is unknown. Please contact customer support for more information.</li>';
