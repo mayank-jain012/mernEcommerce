@@ -1,25 +1,43 @@
 import mongoose from "mongoose";
-const salesModel=mongoose.Schema({
-    product:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Product",
-        required:true
+
+const salesModel = new mongoose.Schema({
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true
     },
-    variant:{
-        size:String,
-        color:String
+    variant: {
+        size: {
+            type: String,
+            required: true
+        },
+        color: {
+            type: String,
+            required: true
+        }
     },
-    quantity:{
+    quantity: {
+        type: Number,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    discountedPrice:{
         type:Number,
-        required:true
     },
-    salesDate:{
-        type:Date,
-        default:Date.now()
+    finalPrice:{
+        type:Number,
     },
-    status:{
-        type:String,
-        enum:["pending","complete"]
+    salesDate: {
+        type: Date,
+        default: Date.now
+    },
+    status: {
+        type: String,
+        enum: ["pending", "complete"],
+        default: "pending"
     },
     category: {
         type: String,
@@ -29,7 +47,8 @@ const salesModel=mongoose.Schema({
         type: String,
         required: true
     }
-},{
-    timestamps:true
+}, {
+    timestamps: true
 });
-export const Sales=mongoose.model("Sales",salesModel);
+
+export const Sales = mongoose.model("Sales", salesModel);

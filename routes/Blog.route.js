@@ -1,5 +1,5 @@
 import express from "express";
-import { createBlog, deleteBlog, disLikeBlog, getABlog, getAllBlogsLikesDislikes, getBlog, getBlogsdisLikes, getBlogsLikes, likeBlog, updateABlog } from "../controller/BlogController.js";
+import { createBlog, deleteBlog, disLikeBlog, getABlog, getAllBlogsLikesDislikes, getBlog, getBlogPerformance, getBlogsdisLikes, getBlogsLikes, getMostViewBlog, likeBlog, updateABlog } from "../controller/BlogController.js";
 import { validateBlog } from "../middlewares/validator.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -14,4 +14,6 @@ router.post('/dislike/:id',authMiddleware,disLikeBlog);
 router.get('/likesBlog/:id',getBlogsLikes);
 router.get('/dislikesBlog/:id',getBlogsdisLikes);
 router.get('/getBlogLikesDislikes',getAllBlogsLikesDislikes);
+router.get('/getMostViewBlog',getMostViewBlog);
+router.get('/getBlogPerformance',getBlogPerformance);
 export default router;

@@ -81,8 +81,8 @@ export const getABlog = asyncHandler(async (req, res, next) => {
             return next(new ApiError([], "", "Blog not found", 402))
         }
         find.views += 1;
-        find.likesCount=find.likes.length;
-        find.disLikesCount=find.dislikes.length;
+        find.likesCount = find.likes.length;
+        find.disLikesCount = find.dislikes.length;
         await find.save();
         const response = new ApiResponse(find, 201, "Blog founded");
         res.status(201).json(response);
@@ -91,129 +91,160 @@ export const getABlog = asyncHandler(async (req, res, next) => {
     }
 })
 export const updateABlog = asyncHandler(async (req, res, next) => {
-    const blogId=req.params.id.trim();
+    const blogId = req.params.id.trim();
     isValidate(blogId);
     try {
-        const {title,content,tags}=req.body;
-        const data=await Blog.findByIdAndUpdate(blogId,{
+        const { title, content, tags } = req.body;
+        const data = await Blog.findByIdAndUpdate(blogId, {
             title,
             content,
             tags,
-            images:req.files.map(file=>file.path)
-        },{new:true})
-        if(!data){
-            return next(new ApiError([],"","Blog was not found",401))
+            images: req.files.map(file => file.path)
+        }, { new: true })
+        if (!data) {
+            return next(new ApiError([], "", "Blog was not found", 401))
         }
-        const response=new ApiResponse(data,201,"Update Blog Successfully")
+        const response = new ApiResponse(data, 201, "Update Blog Successfully")
         res.status(response.statusCode).json(response);
     } catch (error) {
-        next(new ApiError([],error.stack,"An Error Occurred",501))
+        next(new ApiError([], error.stack, "An Error Occurred", 501))
     }
 })
-export const deleteBlog =asyncHandler(async(req,res,next)=>{
-    const id=req.params.id.trim();
+export const deleteBlog = asyncHandler(async (req, res, next) => {
+    const id = req.params.id.trim();
     isValidate(id);
     try {
-        const blog=await Blog.findByIdAndDelete(id);
-        if(!blog){
-            return next(new ApiError([],error,stack,"An Error Occurred",402))
+        const blog = await Blog.findByIdAndDelete(id);
+        if (!blog) {
+            return next(new ApiError([], error, stack, "An Error Occurred", 402))
         }
-        const response=new ApiResponse({},201,"Blog Deleted Successfully");
+        const response = new ApiResponse({}, 201, "Blog Deleted Successfully");
         res.status(response.statusCode).json(response);
     } catch (error) {
-        next(new ApiError([],error.stack,"An Error Occurred",501))
+        next(new ApiError([], error.stack, "An Error Occurred", 501))
     }
 })
-export const likeBlog=asyncHandler(async(req,res,next)=>{
-    const id=req.params.id.trim();
+export const likeBlog = asyncHandler(async (req, res, next) => {
+    const id = req.params.id.trim();
     isValidate(id);
-    const userId=req.user._id;
+    const userId = req.user._id;
     try {
-        const blog=await Blog.findById(id);
-        if(!blog){
-            return next(new ApiError([],"","Blog Not Found",401));
+        const blog = await Blog.findById(id);
+        if (!blog) {
+            return next(new ApiError([], "", "Blog Not Found", 401));
         }
-        if(blog.likes.includes(userId)){
-            return next(new ApiError([],"","You Already Like The Blog",401));
+        if (blog.likes.includes(userId)) {
+            return next(new ApiError([], "", "You Already Like The Blog", 401));
         }
         blog.likes.push(userId);
         blog.dislikes.pull(userId);
         await blog.save();
-        const response =new ApiResponse(blog,201,"Like the blog successfully");
+        const response = new ApiResponse(blog, 201, "Like the blog successfully");
         res.status(201).json(response);
     } catch (error) {
-        new ApiError([],error.stack,"An Error occurred",501)
+        new ApiError([], error.stack, "An Error occurred", 501)
     }
 })
-export const disLikeBlog=asyncHandler(async(req,res,next)=>{
-    const id=req.params.id.trim();
+export const disLikeBlog = asyncHandler(async (req, res, next) => {
+    const id = req.params.id.trim();
     isValidate(id);
-    const userId=req.user._id;
+    const userId = req.user._id;
     try {
-        const blog=await Blog.findById(id);
-        if(!blog){
-            return next(new ApiError([],"","Blog Not Found",401));
+        const blog = await Blog.findById(id);
+        if (!blog) {
+            return next(new ApiError([], "", "Blog Not Found", 401));
         }
-        if(blog.dislikes.includes(userId)){
-            return next(new ApiError([],"","You Already Like The Blog",401));
+        if (blog.dislikes.includes(userId)) {
+            return next(new ApiError([], "", "You Already Like The Blog", 401));
         }
         blog.dislikes.push(userId);
         blog.likes.pull(userId);
         await blog.save();
-        const response =new ApiResponse(blog,201,"Dislike the blog successfully");
+        const response = new ApiResponse(blog, 201, "Dislike the blog successfully");
         res.status(201).json(response);
     } catch (error) {
-        new ApiError([],error.stack,"An Error occurred",501)
+        new ApiError([], error.stack, "An Error occurred", 501)
     }
 })
-export const getBlogsLikes=asyncHandler(async(req,res,next)=>{
-    const id=req.params.id.trim();
+export const getBlogsLikes = asyncHandler(async (req, res, next) => {
+    const id = req.params.id.trim();
     isValidate(id);
     try {
-        const blog=await Blog.findById(id).populate('likes','name')
-        if(!blog){
-            return next(new ApiError([],"","Blog Not Found",401));
+        const blog = await Blog.findById(id).populate('likes', 'name')
+        if (!blog) {
+            return next(new ApiError([], "", "Blog Not Found", 401));
         }
-        const response =new ApiResponse(blog.likes,201,"Like the blog successfully");
+        const response = new ApiResponse(blog.likes, 201, "Like the blog successfully");
         res.status(201).json(response);
     } catch (error) {
-        next(new ApiError([],error.stack,"An Error Occurred",501))
+        next(new ApiError([], error.stack, "An Error Occurred", 501))
     }
 })
-export const getBlogsdisLikes=asyncHandler(async(req,res,next)=>{
-    const id=req.params.id.trim();
+export const getBlogsdisLikes = asyncHandler(async (req, res, next) => {
+    const id = req.params.id.trim();
     isValidate(id);
     try {
-        const blog=await Blog.findById(id).populate('dislikes','name')
-        if(!blog){
-            return next(new ApiError([],"","Blog Not Found",401));
+        const blog = await Blog.findById(id).populate('dislikes', 'name')
+        if (!blog) {
+            return next(new ApiError([], "", "Blog Not Found", 401));
         }
-        const response =new ApiResponse(blog.dislikes,201,"Like the blog successfully");
+        const response = new ApiResponse(blog.dislikes, 201, "Like the blog successfully");
         res.status(201).json(response);
     } catch (error) {
-        next(new ApiError([],error.stack,"An Error Occurred",501))
+        next(new ApiError([], error.stack, "An Error Occurred", 501))
     }
 })
 export const getAllBlogsLikesDislikes = asyncHandler(async (req, res, next) => {
     try {
-      const blogs = await Blog.find({}).populate('likes dislikes', 'name');
-  
-      const result = blogs.map(blog => ({
-        _id: blog._id,
-        title: blog.title,
-        likesCount: blog.likes.length,
-        dislikesCount: blog.dislikes.length
-      }));
-  
-      const response = new ApiResponse(result, 200, "Blogs' likes and dislikes fetched successfully");
-      res.status(response.statusCode).json(response);
+        const blogs = await Blog.find({}).populate('likes dislikes', 'name');
+
+        const result = blogs.map(blog => ({
+            _id: blog._id,
+            title: blog.title,
+            likesCount: blog.likes.length,
+            dislikesCount: blog.dislikes.length
+        }));
+
+        const response = new ApiResponse(result, 200, "Blogs' likes and dislikes fetched successfully");
+        res.status(response.statusCode).json(response);
     } catch (error) {
-      next(new ApiError([], error.stack, "An error occurred while fetching blogs' likes and dislikes", 500));
+        next(new ApiError([], error.stack, "An error occurred while fetching blogs' likes and dislikes", 500));
     }
- });
- // get blog performance
- export const getBlogPerformance=asyncHandler(async(req,res,next)=>{
- })
+});
+// get blog performance
+export const getBlogPerformance = asyncHandler(async (req, res, next) => {
+    try {
+        const totalBlogs = await Blog.countDocuments();
+        const totalViews = await Blog.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalViews: { $sum: 'views' }
+                }
+            }
+        ])
+        const averageViews = totalBlogs > 0 ? totalViews[0].totalViews / totalBlogs : 0;
+        const topBlog = await Blog.find().sort({ views: -1 }).limit(5)
+        const data = {
+            totalBlogs,
+            topBlog,
+            averageViews,
+            totalViews: totalViews ? totalViews[0].totalViews : 0
+        }
+        const response = new ApiResponse(data, 201, "Blog Performance");
+        res.status(201).json(response);
+    } catch (error) {
+        next(new ApiError([], {}, "An Error Occurred", 501))
+    }
+})
 // get most viewed blog
-export const getMostViewBlog=asyncHandler(async(req,res,next)=>{
+export const getMostViewBlog = asyncHandler(async (req, res, next) => {
+    try {
+        const limit = parseInt(req.query.limit);
+        const blog = await Blog.find().sort({ views: -1 }).limit(limit)
+        const response = new ApiResponse(blog, 201, "Most Viewed Blog");
+        res.status(201).json(response);
+    } catch (error) {
+        next(new ApiError([], error.stack, "An error occurred while fetching blogs' likes and dislikes", 500));
+    }
 })
