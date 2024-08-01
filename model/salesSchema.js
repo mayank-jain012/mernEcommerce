@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import mongoosePaginate from 'mongoose-paginate-v2';
 const salesModel = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
@@ -50,5 +50,5 @@ const salesModel = new mongoose.Schema({
 }, {
     timestamps: true
 });
-
+salesModel.plugin(mongoosePaginate);
 export const Sales = mongoose.model("Sales", salesModel);

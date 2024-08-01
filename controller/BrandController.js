@@ -69,10 +69,7 @@ export const deleteBrand = asyncHandler(async (req, res, next) => {
     next(new ApiError([], error.stack, "An error occurred", 501))
   }
 })
-// get top brand
-export const getTopBrand = asyncHandler(async (req, res, next) => {
 
-})
 // get brand performance
 export const getBrandPerformance= asyncHandler(async (req, res, next) => {
 

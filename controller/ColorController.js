@@ -69,7 +69,4 @@ export const createColor=asyncHandler(async(req,res,next)=>{
       next(new ApiError([],error.stack,"An error occurred",501))
     }
   })
-  // get top selling color
-  export const topSellingColor=asyncHandler(async(req,res,next)=>{
-    
-  })
+  

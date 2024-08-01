@@ -5,6 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { validationResult } from "express-validator";
 import { isValidate } from "../utils/mongodbValidate.js";
 import { Product } from "../model/productSchema.js";
+
 export const createVariant=asyncHandler(async(req,res,next)=>{
     const errors=validationResult(req)
     if (!errors.isEmpty()) {
@@ -40,6 +41,7 @@ export const createVariant=asyncHandler(async(req,res,next)=>{
         next(new ApiError([], error.stack, "An error occurred", 500));
       }
 })
+
 export const updateVariant=asyncHandler(async(req,res,next)=>{
   const productId=req.params.id.trim();
   const errors=validationResult(req)
@@ -69,6 +71,7 @@ export const updateVariant=asyncHandler(async(req,res,next)=>{
       next(new ApiError([], error.stack, "An error occurred", 500));
     }
 })
+
 export const getVariant=asyncHandler(async(req,res,next)=>{
     try {
         const products = await Variant.find()
@@ -80,6 +83,7 @@ export const getVariant=asyncHandler(async(req,res,next)=>{
         next(new ApiError([], error.stack, "An error occurred", 500));
       }
 })
+
 export const deleteVariant=asyncHandler(async(req,res,next)=>{
     const id = req.params.id.trim();
   isValidate(id);

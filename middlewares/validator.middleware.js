@@ -190,3 +190,9 @@ export const updateStatusOrder=[
 export const cancelOrderStatus=[
     body('reason').notEmpty().withMessage("Reason is required")
 ]
+
+export const getSaleByDate=[
+body('startDate').notEmpty().isDate().withMessage("Start Date is Required or Date is a invalid"),
+body('endDate').notEmpty().isDate().withMessage("End date is required or Date is invalid")
+
+]

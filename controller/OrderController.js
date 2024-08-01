@@ -61,6 +61,8 @@ export const createOrder = asyncHandler(async (req, res, next) => {
                 category: item.product.category,
                 brand: item.product.brand,
                 price:item.price,
+                // finalPrice:item.finalPrice,
+                // discountedPrice:item.discountedPrice
             });
             sale.finalPrice=cart.finalPrice,
            sale.discountedPrice=cart.discount
@@ -81,7 +83,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         const invoice = await generateInvoice(order)
         const emailData = getEmailTemplate('order', { name: req.user.firstname, orderId: order._id });
         console.log(emailData)
-        await sendEmail(req.user.email, emailData.subject, emailData.text, emailData.html, [{ filename: `${order._id}.pdf`, path: invoice }]);
+        await sendEmail(req.user.email, (await emailData).subject, (await emailData).text, (await emailData).html, [{ filename: `${order._id}.pdf`, path: invoice }]);
         fs.unlink(invoice, (err) => {
             if (err) {
                 console.error(`Error deleting invoice file ${invoice}:`, err);
