@@ -166,16 +166,13 @@ export const validationCreateCart=[
     body('productId').isMongoId().withMessage('Invalid id'),
     body('quantity').notEmpty().withMessage("Quantity is required").isNumeric().withMessage("Quantity must be a number")
 ]
-
 export const validationRemoveCart=[
     body('variantId').isMongoId().withMessage('Invalid id'),
     body('productId').isMongoId().withMessage('Invalid id')
 ]
-
 export const validationApplyCouponCart=[
     body('couponCode').notEmpty().withMessage("Coupon Code is Mandatory").isString().withMessage("Coupon Code Must Be a String")
 ]
-
 export const validationCreateOrder=[
     body('paymentMethod').notEmpty().withMessage("Payment Method is Required"),
     body('shippingAddress').notEmpty().withMessage("Shipping Address is Required"),
@@ -186,13 +183,10 @@ export const validationCreateOrder=[
 export const updateStatusOrder=[
     body('status').notEmpty().isIn(['processing','shipped','delivered','cancelled']).withMessage("Status Must Be Required or Invalid Status")
 ]
-
 export const cancelOrderStatus=[
     body('reason').notEmpty().withMessage("Reason is required")
 ]
-
 export const getSaleByDate=[
-body('startDate').notEmpty().isDate().withMessage("Start Date is Required or Date is a invalid"),
-body('endDate').notEmpty().isDate().withMessage("End date is required or Date is invalid")
-
+body('startDate').optional().isDate().withMessage(" Date is a invalid"),
+body('endDate').optional().isDate().withMessage(" Date is invalid")
 ]

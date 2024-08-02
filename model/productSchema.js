@@ -53,6 +53,15 @@ const productModel = mongoose.Schema({
             5: 0
         }
     },
+    section:{
+        type:String,
+        required:true,
+       enum:['Men','Women','Child']
+    },
+    age:{
+        type:String,
+        required:true
+    }
 }, { timestamps: true });
 productModel.plugin(mongoosePaginate);
 export const Product = mongoose.model('Product', productModel);

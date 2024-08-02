@@ -109,6 +109,14 @@ const orderSchema = mongoose.Schema({
         default: 'processing',
         enum: ['processing', 'shipped', 'delivered', 'cancelled'],
     },
+    discountAmount: {
+        type: Number,
+        default: 0
+    },
+    couponCode: {
+        type: String,
+        default: null,
+    }
 }, { timestamps: true });
 
 export const Order = mongoose.model('Order', orderSchema);

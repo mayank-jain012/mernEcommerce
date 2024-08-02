@@ -12,10 +12,10 @@ import { Inventory } from "../model/inventoryModel.js";
 import { isValidate } from "../utils/mongodbValidate.js";
 import { getEmailTemplate } from "../utils/sendEmail.js";
 import { validationResult } from 'express-validator'
+import {Coupon} from '../model/couponModel.js'
 import fs from 'fs'
 export const createOrder = asyncHandler(async (req, res, next) => {
     const userId = req?.user?._id;
-
     const { paymentMethod, shippingAddress } = req.body;
     const error = validationResult(req);
     // if (!error.isEmpty()) {
@@ -23,15 +23,27 @@ export const createOrder = asyncHandler(async (req, res, next) => {
     //     return next(new ApiError(error.array, "", "Validation error", 501));
     // }
     try {
-        const cart = await Cart.findOne({ user: userId }).populate("items.product items.variant")
+        const cart = await Cart.findOne({ user: userId }).populate("items.product items.variant coupon")
+        const couponCode=cart.coupon.code;
         if (!cart || cart.items.length === 0) {
             return next(new ApiError([], "", "No items in cart", 400));
         }
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode });
+            if (!coupon) {
+              return next(new ApiError([], "", "Invalid coupon code", 400));
+            }
+            if (!coupon.isActive || coupon.expiry < new Date()) {
+              return next(new ApiError([], "", "Coupon is not active or has expired", 400));
+            }
+            coupon.usedCount += 1;
+            await coupon.save();
+          }
         const deliveryCharges = await calculateShipping('4', shippingAddress.postalCode);
         const itemPrice = cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
         const taxPrice = itemPrice * 0.18;
         const totalPrice = deliveryCharges + itemPrice + taxPrice;
-
+        const discountAmount=cart.discount;
         const order = await Order.create({
             user: userId,
             orderItems: cart.items.map(item => ({
@@ -47,7 +59,9 @@ export const createOrder = asyncHandler(async (req, res, next) => {
             itemsPrice: itemPrice,
             taxPrice,
             shippingPrice: deliveryCharges,
-            totalPrice
+            totalPrice,
+            discountAmount,
+            couponCode
         })
         await order.save();
         for (const item of cart.items) {
@@ -61,8 +75,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
                 category: item.product.category,
                 brand: item.product.brand,
                 price:item.price,
-                // finalPrice:item.finalPrice,
-                // discountedPrice:item.discountedPrice
+              
             });
             sale.finalPrice=cart.finalPrice,
            sale.discountedPrice=cart.discount
@@ -82,7 +95,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         await cart.save();
         const invoice = await generateInvoice(order)
         const emailData = getEmailTemplate('order', { name: req.user.firstname, orderId: order._id });
-        console.log(emailData)
+       
         await sendEmail(req.user.email, (await emailData).subject, (await emailData).text, (await emailData).html, [{ filename: `${order._id}.pdf`, path: invoice }]);
         fs.unlink(invoice, (err) => {
             if (err) {
@@ -91,6 +104,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
                 console.log(`Invoice file ${invoice} deleted successfully`);
             }
         })
+
         if (paymentMethod === "Online") {
             const razorpayOrder = await razorpay.orders.create({
                 amount: totalPrice * 100, // Amount in paise

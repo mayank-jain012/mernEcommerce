@@ -70,11 +70,3 @@ export const deleteBrand = asyncHandler(async (req, res, next) => {
   }
 })
 
-// get brand performance
-export const getBrandPerformance= asyncHandler(async (req, res, next) => {
-
-})
-// get brand sales trends
-export const brandSalesTrends=asyncHandler(async(req,res,next)=>{
-
-})
