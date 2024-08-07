@@ -119,20 +119,20 @@ export const getRejectEmailContent = (orderId, reason) => {
   <p>Best regards,<br>[Your Company Name]</p>`
 };
 
-export const getAcceptReturnEmailContent = (orderId, productName, variant) => {
+export const getAcceptReturnEmailContent = (orderId, productName, oldSize,oldColor) => {
   `<p>Dear Customer,</p>
 <p>We are pleased to inform you that your return request for order <strong>#${orderId}</strong> has been approved.</p>
-<p><strong>Product:</strong> ${productName}<br><strong>Variant:</strong> ${variant}</p>
+<p><strong>Product:</strong> ${productName}<br><strong>Size:</strong> ${oldSize}</p><strong>Color:</strong> ${oldColor}</p>
 <p>Please follow the return instructions provided in the original packaging or contact our support team for further assistance.</p>
 <p>Thank you for shopping with us.</p>
 <p>Best regards,<br>[Your Company Name]</p>`
 };
 
-export const getAcceptReplaceEmailContent = (orderId, productName, oldVariant, newVariant) => {
+export const getAcceptReplaceEmailContent = (orderId, productName, oldSize,oldColor, newColor,newSize) => {
   
      `<p>Dear Customer,</p>
 <p>We are pleased to inform you that your replacement request for order <strong>#${orderId}</strong> has been approved.</p>
-<p><strong>Product:</strong> ${productName}<br><strong>From:</strong> ${oldVariant}<br><strong>To:</strong> ${newVariant}</p>
+<p><strong>Product:</strong> ${productName}<br><strong>From:</strong> ${oldSize} ${oldColor}<br><strong>To:</strong> ${newColor} ${newSize}</p>
 <p>Please follow the replacement instructions provided in the original packaging or contact our support team for further assistance.</p>
 <p>Thank you for shopping with us.</p>
 <p>Best regards,<br>[Your Company Name]</p>`

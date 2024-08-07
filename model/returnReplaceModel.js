@@ -16,14 +16,23 @@ const replaceSchema = new mongoose.Schema({
     ref: 'Product',
     required: true
   },
-  originalVariant: {
+  originalSize: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Variant',
+    ref: 'Size',
     required: true
   },
-  newVariant: {
+  originalColor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Variant'
+    ref: 'Color',
+    required: true
+  },
+  newSize: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Size'
+  },
+  newColor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Color'
   },
   reason: {
     type: String,

@@ -6,24 +6,20 @@ import { Inventory } from "../model/inventoryModel.js";
 import { Sales } from "../model/salesSchema.js";
 import { getEmailTemplate, sendEmail } from "../utils/sendEmail.js";
 export const createReplaceRequest = asyncHandler(async (req, res, next) => {
-  const { order, product, originalVariant, newVariant, reason, type } = req.body;
+  const { order, product, originalSize,originalColor, newSize,newColor, reason, type } = req.body;
   const userId = req.user._id;
-
   try {
     const replaceRequest = await Replace.create({
       order,
       user: userId,
       product,
-      originalVariant,
-      newVariant,
+      originalSize,
+      originalColor,
+      newSize,
+      newColor,
       reason,
       type
     });
-    if (type = "replace") {
-
-    } else {
-
-    }
     const response = new ApiResponse(replaceRequest, 201, 'Replace request created successfully');
     res.status(response.statusCode).json(response);
   } catch (error) {
@@ -76,105 +72,86 @@ export const getAllReplaceRequests = asyncHandler(async (req, res, next) => {
     next(new ApiError([], error.stack, 'An error occurred while retrieving replace requests', 500));
   }
 });
-
+// Controller to handle replace/return requests
 export const handleReplaceRequest = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { status } = req.body;
-
   try {
-    const replaceRequest = await Replace.findById(id).populate('user product originalVariant newVariant');
-
+    const replaceRequest = await Replace.findById(id).populate('user product originalSize originalColor newSize newColor');
     if (!replaceRequest) {
       return next(new ApiError([], '', 'Replace request not found', 404));
     }
+   
 
-    const requestDate = new Date(replaceRequest.requestDate);
-    const currentDate = new Date();
-    const timeDiff = currentDate - requestDate;
-    const dayDiff = timeDiff / (1000 * 3600 * 24);
+    
 
-    if (dayDiff > 7) {
-      return next(new ApiError([], '', 'Request is older than 7 days', 400));
-    }
-
-    replaceRequest.status = status;
+ replaceRequest.status = status;
 
     if (status === 'approved') {
       replaceRequest.completionDate = Date.now();
 
       if (replaceRequest.type === 'return') {
         await Sales.updateOne(
-          { product: replaceRequest.product._id, 'variant.variantId': replaceRequest.originalVariant._id },
+          { product: replaceRequest.product._id, 'variant.size': replaceRequest.originalSize._id, 'variant.color': replaceRequest.originalColor._id },
           { $inc: { quantity: -1 } }
         );
 
         await Inventory.updateOne(
-          { product: replaceRequest.product._id, variant: replaceRequest.originalVariant._id },
+          { product: replaceRequest.product._id, 'variant.size': replaceRequest.originalSize._id, 'variant.color': replaceRequest.originalColor._id },
           { $inc: { quantity: 1 } }
         );
-        const obj={
-          email:replaceRequest.user.email,
+
+        const emailData = await getEmailTemplate('return', {
+          email: replaceRequest.user.email,
           orderId: replaceRequest.order,
           productName: replaceRequest.product.name,
-          variantSize: replaceRequest.originalVariant.size,
-          variantColor:replaceRequest.originalVariant.color
-        }
-        const emailData=getEmailTemplate('replace',obj)
-        await sendEmail(obj.email,(await emailData).subject,(await emailData).text,(await emailData).html)
-        // await sendReturnEmail(replaceRequest.user.email, {
-        //   orderId: replaceRequest.order,
-        //   productName: replaceRequest.product.name,
-        //   variant: `${replaceRequest.originalVariant.size} / ${replaceRequest.originalVariant.color}`
-        // });
-      } else if (replaceRequest.type === 'replace') {
-        if (replaceRequest.newVariant) {
+          oldSize: replaceRequest.originalSize.size,
+          oldColor: replaceRequest.originalColor.color
+        });
+
+        await sendEmail(replaceRequest.user.email, emailData.subject, emailData.text, emailData.html);
+      } 
+      else if (replaceRequest.type === 'replace') {
+        console.log(replaceRequest.newSize)
+        console.log(replaceRequest.newColor)
+        if (replaceRequest.newSize && replaceRequest.newColor) {
           await Sales.updateOne(
-            { product: replaceRequest.product._id, 'variant.variantId': replaceRequest.originalVariant._id },
+            { product: replaceRequest.product._id, 'variant.size': replaceRequest.originalSize._id, 'variant.color': replaceRequest.originalColor._id },
             { $inc: { quantity: -1 } }
           );
-
           await Inventory.updateOne(
-            { product: replaceRequest.product._id, variant: replaceRequest.originalVariant._id },
+            { product: replaceRequest.product._id, 'variant.size': replaceRequest.originalSize._id, 'variant.color': replaceRequest.originalColor._id },
             { $inc: { quantity: 1 } }
           );
-
           await Sales.updateOne(
-            { product: replaceRequest.product._id, 'variant.variantId': replaceRequest.newVariant._id },
+            { product: replaceRequest.product._id, 'variant.size': replaceRequest.newSize._id, 'variant.color': replaceRequest.newColor._id },
             { $inc: { quantity: 1 } }
           );
-
           await Inventory.updateOne(
-            { product: replaceRequest.product._id, variant: replaceRequest.newVariant._id },
+            { product: replaceRequest.product._id, 'variant.size': replaceRequest.newSize._id, 'variant.color': replaceRequest.newColor._id },
             { $inc: { quantity: -1 } }
           );
-          const obj2={
-            email:replaceRequest.user.email,
+          const emailData = await getEmailTemplate('replace', {
+            email: replaceRequest.user.email,
             orderId: replaceRequest.order,
             productName: replaceRequest.product.name,
-            oldVariantSize:replaceRequest.originalVariant.size,
-            oldVariantColor:replaceRequest.originalVariant.color,
-            newVariantSize:replaceRequest.newVariant.size,
-            newVariantColor:replaceRequest.newVariant.color
-          }
-          const emailValue=getEmailTemplate('return',obj2)
-          await sendEmail(email,(await emailValue).subject,(await emailValue).text,(await emailValue).html)
-          // await sendReplaceEmail(replaceRequest.user.email, {
-          //   orderId: replaceRequest.order,
-          //   productName: replaceRequest.product.name,
-          //   oldVariant: `${replaceRequest.originalVariant.size} / ${replaceRequest.originalVariant.color}`,
-          //   newVariant: `${replaceRequest.newVariant.size} / ${replaceRequest.newVariant.color}`
-          // });
-        } else {
+            oldSize: replaceRequest.originalSize.size,
+            oldColor: replaceRequest.originalColor.color,
+            newSize: replaceRequest.newSize.size,
+            newColor: replaceRequest.newColor.color
+          });
+          await sendEmail(replaceRequest.user.email, emailData.subject, emailData.text, emailData.html);
+        } 
+        else {
           return next(new ApiError([], '', 'New variant is required for replacement', 400));
         }
       }
     }
-
     await replaceRequest.save();
-
     const response = new ApiResponse(replaceRequest, 200, 'Replace request status updated successfully');
     res.status(response.statusCode).json(response);
   } catch (error) {
     next(new ApiError([], error.stack, 'An error occurred while updating the replace request status', 500));
   }
 });
+

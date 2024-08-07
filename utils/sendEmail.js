@@ -89,11 +89,12 @@ export const getEmailTemplate = async (type, data) => {
       }
     case 'return':
       return {
-        subject: `Return Request Approved for Order #${orderId}`,
+        subject: `Return Request Approved for Order #${data.orderId}`,
         text: `Dear Customer,
-            We are pleased to inform you that your return request for order #${orderId} has been approved.
-            Product: ${productName}
-            Variant: ${variant}
+            We are pleased to inform you that your return request for order #${data.orderId} has been approved.
+            Product: ${data.productName}
+            Size: ${data.oldSize}
+            Color:${data.oldColor}
             Please follow the return instructions provided in the original packaging or contact our support team for further assistance.
             Thank you for shopping with us.
             Best regards,
@@ -101,20 +102,23 @@ export const getEmailTemplate = async (type, data) => {
         `,
         html: getAcceptReturnEmailContent()
       }
-    case 'replce':
+    case 'replace':
       return {
-        subject: `Replacement Request Approved for Order #${orderId}`,
+        subject: `Replacement Request Approved for Order #${data.orderId}`,
         text: `Dear Customer,
-            We are pleased to inform you that your replacement request for order #${orderId} has been approved.
-            Product: ${productName}
-            From: ${oldVariant}
-            To: ${newVariant}
-            Please follow the replacement instructions provided in the original packaging or contact our support team for further assistance.
+            We are pleased to inform you that your replacement request for order #${data.orderId} has been approved.
+            Product: ${data.productName}
+            From Size: ${data.oldSize}
+            From Color: ${data.oldColor}
+            To Size: ${data.newSize}
+            To Color: ${data.newColor}
+            Please follow the replacement instructions provided in the original packaging 
+            or contact our support team for further assistance.
             Thank you for shopping with us.
             Best regards,
             [Your Company Name]
         `,
-        html: getAcceptReplaceEmailContent()
+        html: getAcceptReplaceEmailContent(data.orderId, data.productName, data.oldSize,data.oldColor, data.newColor,data.newSize)
       }
     default:
       return {};
