@@ -13,7 +13,7 @@ export const createProduct = asyncHandler(async (req, res, next) => {
     return next(new ApiError(errors.array(), "", "Validation Error", 400));
   }
   try {
-    const { name, category, brand, description } = req.body;
+    const { name, category, brand, description,section,age } = req.body;
     console.log(name);
     const slug = slugify(name, { lower: true });
     // Creating product
@@ -23,7 +23,9 @@ export const createProduct = asyncHandler(async (req, res, next) => {
       category,
       brand,
       description,
-      images: req.files.map(file => file.path)
+      images: req.files.map(file => file.path),
+      section,
+      age
     });
     // Saving product
     product = await product.save();
@@ -34,16 +36,21 @@ export const createProduct = asyncHandler(async (req, res, next) => {
     next(new ApiError([], error.stack, "An error occurred", 500));
   }
 })
-
 export const getProduct = asyncHandler(async (req, res, next) => {
   try {
-    const {brand,size,color,category,limit=10,page=1,sort="createdAt"}=req.query;
+    const {brand,size,color,category,limit=10,page=1,sort="createdAt",section,age}=req.query;
     let filter={};
     if(brand){
       filter.brand=brand;
     }
     if(category){
       filter.category=category
+    }
+    if(section){
+      filter.section=section
+    }
+    if(age){
+      filter.age=age
     }
     if(color|| size){
       let variantFilter={}
@@ -97,7 +104,6 @@ export const deleteProduct = asyncHandler(async (req, res, next) => {
     next(new ApiError([], error.stack, "An error Occurred", 501))
   }
 })
-
 export const updateProduct = asyncHandler(async (req, res, next) => {
   const id=req.params.id.trim();
   isValidate(id);
@@ -106,11 +112,13 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
   //   return next(new ApiError(errors.array(), "", "Validation Error", 400));
   // }
   try {
-    const { category, brand, description } = req.body;
+    const { category, brand, description,section,age } = req.body;
     const product=await Product.findByIdAndUpdate(id,{
       category,
       brand,
       description,
+      section,
+      age
     },{new:true});
     if(!product){
       return next(new ApiError([], "", "Product not exist", 402))

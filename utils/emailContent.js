@@ -81,7 +81,7 @@ export const TrackOrderContent = (username, status, order_number, order_date, it
       </tbody>
     </table>
   `;
-    return `
+  return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
     <h2 style="color: #333;">Order Status Update</h2>
     <p>Hi ${username},</p>
@@ -107,9 +107,39 @@ export const TrackOrderContent = (username, status, order_number, order_date, it
     <p>mayankjain12feb@gmail.com</p>
     <p>+918826250203</p>
 </div>
-
-
 `
 }
+
+export const getRejectEmailContent = (orderId, reason) => {
+  `<p>Dear Customer,</p>
+  <p>We regret to inform you that your return/replace request for order <strong>#${orderId}</strong> has been rejected.</p>
+  <p><strong>Reason:</strong> ${reason}</p>
+  <p>If you have any questions or need further assistance, please contact our support team.</p>
+  <p>Thank you for your understanding.</p>
+  <p>Best regards,<br>[Your Company Name]</p>`
+};
+
+export const getAcceptReturnEmailContent = (orderId, productName, variant) => {
+  `<p>Dear Customer,</p>
+<p>We are pleased to inform you that your return request for order <strong>#${orderId}</strong> has been approved.</p>
+<p><strong>Product:</strong> ${productName}<br><strong>Variant:</strong> ${variant}</p>
+<p>Please follow the return instructions provided in the original packaging or contact our support team for further assistance.</p>
+<p>Thank you for shopping with us.</p>
+<p>Best regards,<br>[Your Company Name]</p>`
+};
+
+export const getAcceptReplaceEmailContent = (orderId, productName, oldVariant, newVariant) => {
+  
+     `<p>Dear Customer,</p>
+<p>We are pleased to inform you that your replacement request for order <strong>#${orderId}</strong> has been approved.</p>
+<p><strong>Product:</strong> ${productName}<br><strong>From:</strong> ${oldVariant}<br><strong>To:</strong> ${newVariant}</p>
+<p>Please follow the replacement instructions provided in the original packaging or contact our support team for further assistance.</p>
+<p>Thank you for shopping with us.</p>
+<p>Best regards,<br>[Your Company Name]</p>`
+  
+};
+
+
+
 
 

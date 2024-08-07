@@ -1,5 +1,5 @@
 import express from 'express'
-import { createOrder, payment, trackOrder, updateStatus, cancelOrder, averageOrderValue, statusBreakDown } from '../controller/OrderController.js';
+import { createOrder, payment, trackOrder, updateStatus, cancelOrder, averageOrderValue, statusBreakDown, getAllOrders } from '../controller/OrderController.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { updateStatusOrder, validationCreateOrder, cancelOrderStatus } from '../middlewares/validator.middleware.js';
 const router = express.Router();
@@ -10,4 +10,5 @@ router.put('/cancel/:id', cancelOrderStatus, cancelOrder);
 router.post('/payment', payment);
 router.get('/average', averageOrderValue);
 router.get('/status-breakdown', statusBreakDown);
+router.get('/get',getAllOrders);
 export default router;

@@ -1,12 +1,7 @@
 import nodemailer from 'nodemailer';
 import { otpGeneratorAndUpdate } from './otpGenerator.js';
-import { forgotPasswordContent, loginEmailTemplate, OrderPlacedContent, registrationEmailTemplate,TrackOrderContent } from './emailContent.js';
+import { forgotPasswordContent, getRejectEmailContent, loginEmailTemplate, OrderPlacedContent, registrationEmailTemplate, TrackOrderContent, getAcceptReplaceEmailContent, getAcceptReturnEmailContent } from './emailContent.js';
 export const sendEmail = async (to, subject, text, html, attachments) => {
-  // console.log(to)
-  console.log(subject)
-  console.log(text)
-  console.log(html)
- 
   try {
     let transporter = nodemailer.createTransport({
       service: "gmail",
@@ -25,7 +20,7 @@ export const sendEmail = async (to, subject, text, html, attachments) => {
         html,
         text,
       })
-    }else{
+    } else {
       const info = await transporter.sendMail({
         from: '"DIGITAL DELIGHTS"<digital.delight@gmail.com>',
         to,
@@ -39,8 +34,8 @@ export const sendEmail = async (to, subject, text, html, attachments) => {
     throw new error("Error sending welcome email", error.message);
   }
 }
-export const getEmailTemplate = async (type, data) => { 
-  console.log(data);  
+export const getEmailTemplate = async (type, data) => {
+
   switch (type) {
     case 'signup':
       return {
@@ -59,7 +54,7 @@ export const getEmailTemplate = async (type, data) => {
       return {
         subject: 'Forgot Password',
         text: `Hello ${data.exist.firstname + data.exist.lastname}, you have successfully logged in.`,
-         html: forgotPasswordContent(data.exist.firstname + data.exist.lastname, otp)
+        html: forgotPasswordContent(data.exist.firstname + data.exist.lastname, otp)
       };
     case 'order':
       return {
@@ -71,7 +66,7 @@ export const getEmailTemplate = async (type, data) => {
       return {
         subject: ` Update on Your Order ${data.order._id} - Current Status: ${data.order.status}`,
         text: `Hello ${data.order.user.firstname}, you can track your order ${data.order._id}.`,
-        html: TrackOrderContent(data.order.user.firstname,data.order.status,data.order._id,data.order.createdAt,data.order.orderItems),
+        html: TrackOrderContent(data.order.user.firstname, data.order.status, data.order._id, data.order.createdAt, data.order.orderItems),
       };
     case 'coupon':
       return {
@@ -79,6 +74,48 @@ export const getEmailTemplate = async (type, data) => {
         text: `Hello ${data.name}, use the coupon code ${data.couponCode} to get a discount.`,
         html: `<p>Hello <strong>${data.name}</strong>, use the coupon code <strong>${data.couponCode}</strong> to get a discount.</p>`,
       };
+    case 'rejected':
+      return {
+        subject: `Return/Replace Request Rejected for Order #${orderId}`,
+        text: `Dear Customer,
+            We regret to inform you that your return/replace request for order #${orderId} has been rejected. 
+            Reason: ${reason}
+            If you have any questions or need further assistance, please contact our support team.
+            Thank you for your understanding.
+            Best regards,
+            DIGITAL DELIGHTS
+          `,
+        html: getRejectEmailContent()
+      }
+    case 'return':
+      return {
+        subject: `Return Request Approved for Order #${orderId}`,
+        text: `Dear Customer,
+            We are pleased to inform you that your return request for order #${orderId} has been approved.
+            Product: ${productName}
+            Variant: ${variant}
+            Please follow the return instructions provided in the original packaging or contact our support team for further assistance.
+            Thank you for shopping with us.
+            Best regards,
+            DIGITAL DELIGHTS
+        `,
+        html: getAcceptReturnEmailContent()
+      }
+    case 'replce':
+      return {
+        subject: `Replacement Request Approved for Order #${orderId}`,
+        text: `Dear Customer,
+            We are pleased to inform you that your replacement request for order #${orderId} has been approved.
+            Product: ${productName}
+            From: ${oldVariant}
+            To: ${newVariant}
+            Please follow the replacement instructions provided in the original packaging or contact our support team for further assistance.
+            Thank you for shopping with us.
+            Best regards,
+            [Your Company Name]
+        `,
+        html: getAcceptReplaceEmailContent()
+      }
     default:
       return {};
   }

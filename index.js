@@ -23,6 +23,8 @@ import CartRoute from './routes/Cart.route.js';
 import OrderRoute from './routes/Order.route.js';
 import InventoryRoute from './routes/Inventory.route.js';
 import SalesRoute from './routes/Sales.route.js';
+import VisitorRoute from './routes/TrackVisitor.route.js'
+import { trackVisit } from './middlewares/trackVisit.middleware.js';
 app.use(cors({
     origin:process.env.CROSS_ORIGIN,
     credentials:true
@@ -46,8 +48,10 @@ app.use('/api/wishlist',WishListRoute);
 app.use('/api/cart',CartRoute);
 app.use('/api/order',OrderRoute);
 app.use('/api/inventory',InventoryRoute);
-app.use('/api/sales',SalesRoute)
+app.use('/api/sales',SalesRoute);
+app.use('/api/visitors',VisitorRoute);
 app.use(errorHandler);
+app.use(trackVisit);
 connection()
     .then(() => {
         app.listen(PORT, () => {

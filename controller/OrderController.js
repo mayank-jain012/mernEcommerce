@@ -14,6 +14,7 @@ import { getEmailTemplate } from "../utils/sendEmail.js";
 import { validationResult } from 'express-validator'
 import {Coupon} from '../model/couponModel.js'
 import fs from 'fs'
+
 export const createOrder = asyncHandler(async (req, res, next) => {
     const userId = req?.user?._id;
     const { paymentMethod, shippingAddress } = req.body;
@@ -53,6 +54,8 @@ export const createOrder = asyncHandler(async (req, res, next) => {
                 color: item.variant.color,
                 size: item.variant.size,
                 quantity: item.quantity,
+                section:item.section,
+                age:item.age
             })),
             shippingAddress,
             paymentMethod,
@@ -250,6 +253,40 @@ export const trackOrder = asyncHandler(async (req, res, next) => {
         next(new ApiError([], "", error.message, 501))
     }
 })
+//get all orders
+export const getAllOrders=asyncHandler(async(req,res,next)=>{
+    const {startDate,endDate,maxPrice,minPrice,status}=req.query;
+    try {
+        const filter={};
+        if(startDate || endDate){
+            filter.createdAt={};
+            if(startDate){
+                filter.createdAt.$gte=new Date(startDate);
+            }
+            if(endDate){
+                filter.createdAt.$lte=new Date(endDate);
+            }
+        }
+        if(status){
+            filter.status=status;
+        }
+        if(maxPrice|| minPrice){
+            filter.totalPrice={}
+            if(minPrice){
+                filter.totalPrice.$gte=parseFloat(minPrice);
+            }
+            if(maxPrice){
+                filter.totalPrice.$lte=parseFloat(maxPrice);
+            }
+        }
+        const order=await Order.find(filter);
+        const response=new ApiResponse(order,201,"Get All the Orders Successfully");
+        res.status(201).json(response);
+    } catch (error) {
+        next(new ApiError([],error.stack,"An Error Occurred,501"))
+    }
+})
+
 export const payment = asyncHandler(async (req, res, next) => {
     const { paymentId, orderId, signature } = req.body;
     const secret = process.env.KEY_SECRET;

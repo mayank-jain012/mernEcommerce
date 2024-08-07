@@ -25,6 +25,15 @@ const orderItemSchema = mongoose.Schema({
     quantity: {
         type: Number,
         required: true,
+    },
+    section:{
+        type:String,
+        enum:["Male","Female","Children"],
+        required:true
+    },
+    age:{
+        type:Number,
+        required:true
     }
 }, { _id: false });
 
